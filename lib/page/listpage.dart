@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider_listview/page/edit.dart';
+import 'package:provider_listview/page/edit.dart';
 
 import '../models/task.dart';
 import '../service/tasklist.dart';
@@ -36,10 +38,49 @@ class _MyListPageState extends State<MyListPage> {
                   var task = context.watch<Tasklist>().taskList[index];
                   return Dismissible(
                     key: UniqueKey(),
-                    onDismissed: (direction) {
-                      context.read<Tasklist>().deleteTask(task);
+                    background: Container(
+                      color: Colors.blue,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Row(
+                          children: const <Widget>[
+                            Icon(Icons.folder_open, color: Colors.white),
+                            Text(' Edit Task',
+                                style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    secondaryBackground: Container(
+                      color: Colors.red,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: const <Widget>[
+                            Icon(Icons.delete, color: Colors.white),
+                            Text('Remove Task',
+                                style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    onDismissed: (DismissDirection direction) {
+                      if (direction == DismissDirection.startToEnd) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditTaskPage(model: task),
+                          ),
+                        ).then((value) {
+                          context.read<Tasklist>().fetchTaskList();
+                        });
+                      } else {
+                        context.read<Tasklist>().deleteTask(task).then((value) {
+                          context.read<Tasklist>().fetchTaskList();
+                        });
+                      }
                     },
-                    background: Container(color: Colors.red),
                     child: ListTile(
                       title:
                           Text(context.watch<Tasklist>().taskList[index].name),
